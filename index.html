@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NED — build the future</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-dark:    #0A1628;
+      --bg-surface: #1A2F4A;
+      --accent:     #39D98A;
+      --accent-lt:  #B8F5D8;
+      --accent-glow: rgba(57, 217, 138, 0.15);
+      --text:       #E8EDF2;
+      --text-muted: #8FA3B8;
+      --border:     #1F3550;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-weight: 400;
+      background-color: var(--bg-dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 44px;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .section-label::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 10px;
+      height: 2px;
+      background-color: var(--accent);
+      transform: translateY(-50%);
+    }
+
+    /* ── Scroll reveal ─────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-stagger > .reveal:nth-child(1) { transition-delay: 0s; }
+    .reveal-stagger > .reveal:nth-child(2) { transition-delay: 0.1s; }
+    .reveal-stagger > .reveal:nth-child(3) { transition-delay: 0.2s; }
+    .reveal-stagger > .reveal:nth-child(4) { transition-delay: 0.3s; }
+    .reveal-stagger > .reveal:nth-child(5) { transition-delay: 0.4s; }
+    .reveal-stagger > .reveal:nth-child(6) { transition-delay: 0.5s; }
+
+    /* ── Logo ──────────────────────────────────────────────────── */
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .logo-wordmark {
+      font-size: 1.1875rem;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    /* ── Navbar ─────────────────────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 200;
+      height: 64px;
+      background-color: rgba(10, 22, 40, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transition: background-color 0.3s ease;
+    }
+
+    .navbar.scrolled {
+      background-color: rgba(10, 22, 40, 0.96);
+    }
+
+    .navbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background-color: var(--accent);
+      transition: width 0.2s ease;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-nav {
+      display: inline-block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--bg-dark);
+      background-color: var(--accent);
+      padding: 9px 20px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-nav:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      width: 34px;
+      height: 34px;
+    }
+
+    .nav-toggle span {
+      display: block;
+      height: 1.5px;
+      background-color: var(--text);
+      transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+    }
+
+    .nav-toggle span:first-child { width: 22px; }
+    .nav-toggle span:last-child  { width: 14px; }
+
+    .nav-toggle[aria-expanded="true"] span:first-child {
+      transform: rotate(45deg) translate(5px, 4.5px);
+      width: 18px;
+    }
+
+    .nav-toggle[aria-expanded="true"] span:last-child {
+      transform: rotate(-45deg) translate(5px, -4.5px);
+      width: 18px;
+    }
+
+    @media (max-width: 767px) {
+      .nav-links {
+        display: none;
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background-color: rgba(10, 22, 40, 0.96);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 24px 28px;
+        gap: 20px;
+        z-index: 199;
+      }
+
+      .nav-links.is-open { display: flex; }
+      .nav-toggle { display: flex; }
+      .nav-right .btn-nav { display: none; }
+
+      .nav-mobile-cta {
+        display: inline-block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--bg-dark);
+        background-color: var(--accent);
+        padding: 9px 20px;
+        text-decoration: none;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .nav-mobile-cta-item { display: none; }
+    }
+
+    /* ── Buttons ────────────────────────────────────────────────── */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--bg-dark);
+      background-color: var(--accent);
+      padding: 14px 32px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.9375rem;
+      font-weight: 400;
+      font-family: inherit;
+      color: var(--text-muted);
+      background-color: transparent;
+      padding: 14px 32px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* ── Hero ───────────────────────────────────────────────────── */
+    .hero {
+      background-color: var(--bg-dark);
+      padding: 140px 0 100px;
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    #particles {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-orb {
+      position: absolute;
+      top: 50%;
+      right: -60px;
+      transform: translateY(-50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-orb svg {
+      width: 560px;
+      height: 560px;
+      opacity: 0.06;
+      animation: orbit-spin 90s linear infinite;
+    }
+
+    @keyframes orbit-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .hero-layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    @media (min-width: 900px) {
+      .hero-layout {
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+      }
+    }
+
+    .hero-headline {
+      font-size: clamp(2.25rem, 5.5vw, 4.375rem);
+      font-weight: 500;
+      line-height: 1.07;
+      letter-spacing: -1.5px;
+      color: var(--text);
+      max-width: 680px;
+      margin-bottom: 24px;
+      min-height: 1.2em;
+    }
+
+    .hero-headline .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 0.85em;
+      background-color: var(--accent);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 0.7s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .hero-sub {
+      max-width: 540px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .hero-track {
+      display: flex;
+      transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .hero-slide {
+      flex: 0 0 100%;
+      min-width: 0;
+      font-size: clamp(0.9375rem, 1.8vw, 1.0625rem);
+      color: var(--text);
+      line-height: 1.65;
+      background: rgba(26, 47, 74, 0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 20px 24px;
+    }
+
+    .hero-progress {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+
+    .hero-dot {
+      width: 24px;
+      height: 3px;
+      background-color: var(--border);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: background-color 0.3s ease, width 0.3s ease;
+    }
+
+    .hero-dot.is-active {
+      background-color: var(--accent);
+      width: 40px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Hero image placeholder */
+    .hero-image {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, rgba(26, 47, 74, 0.6), rgba(26, 47, 74, 0.3));
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .hero-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 20px,
+        rgba(57, 217, 138, 0.03) 20px,
+        rgba(57, 217, 138, 0.03) 21px
+      );
+    }
+
+    .placeholder-icon {
+      width: 48px;
+      height: 48px;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .placeholder-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 899px) {
+      .hero { min-height: auto; padding: 112px 0 72px; }
+      .hero-image { display: none; }
+      .hero-orb svg { width: 300px; height: 300px; opacity: 0.04; }
+    }
+
+    /* ── Stats ──────────────────────────────────────────────────── */
+    .section-stats {
+      background-color: var(--bg-dark);
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px 16px;
+    }
+
+    @media (min-width: 640px) {
+      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Problem ────────────────────────────────────────────────── */
+    .section-problem {
+      background-color: var(--bg-surface);
+      padding: 96px 0;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .problem-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .problem-card {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 36px 28px;
+      transition: border-color 0.3s ease, transform 0.3s ease,
+                  box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .problem-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .problem-card:hover::after { transform: scaleX(1); }
+
+    .problem-num {
+      display: block;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      margin-bottom: 18px;
+    }
+
+    .problem-title {
+      font-size: 1.0625rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .problem-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.72;
+    }
+
+    /* ── Subjects ───────────────────────────────────────────────── */
+    .section-subjects {
+      background-color: var(--bg-dark);
+      padding: 96px 0;
+    }
+
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 600px) {
+      .subjects-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .subject-card {
+      border: 1px solid var(--border);
+      background-color: var(--bg-surface);
+      padding: 28px 22px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease,
+                  transform 0.3s ease;
+      position: relative;
+    }
+
+    .subject-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 24px var(--accent-glow),
+                  inset 0 0 24px rgba(57, 217, 138, 0.04);
+      transform: translateY(-3px);
+    }
+
+    .subject-icon {
+      display: block;
+      width: 36px;
+      height: 36px;
+      margin-bottom: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .subject-card:hover .subject-icon {
+      transform: scale(1.1);
+    }
+
+    .subject-name {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .subject-desc {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .subject-tag {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--bg-dark);
+      background-color: var(--accent-lt);
+      padding: 3px 10px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Skills ─────────────────────────────────────────────────── */
+    .section-skills {
+      background-color: var(--bg-surface);
+      padding: 96px 0;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 600px) {
+      .skills-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 960px) {
+      .skills-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .skill-card {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 32px 26px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .skill-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at 0% 0%,
+        rgba(57, 217, 138, 0.06) 0%,
+        transparent 60%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .skill-card:hover::before { opacity: 1; }
+
+    .skill-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .skill-icon svg {
+      transition: transform 0.3s ease;
+    }
+
+    .skill-card:hover .skill-icon svg {
+      transform: scale(1.12);
+    }
+
+    .skill-name {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .skill-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.72;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── How it works ───────────────────────────────────────────── */
+    .section-how {
+      background-color: var(--bg-surface);
+      padding: 96px 0;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .steps { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    }
+
+    .step-card {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 36px 28px;
+      position: relative;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .step-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    /* connector line on desktop */
+    @media (min-width: 768px) {
+      .step-card:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 50px;
+        right: -13px;
+        width: 26px;
+        height: 2px;
+        background-color: var(--accent);
+        z-index: 2;
+      }
+    }
+
+    .step-num {
+      width: 44px;
+      height: 44px;
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .step-card:hover .step-num {
+      background-color: var(--accent);
+      color: var(--bg-dark);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .step-img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: rgba(26, 47, 74, 0.4);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-img::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 14px,
+        rgba(57, 217, 138, 0.03) 14px,
+        rgba(57, 217, 138, 0.03) 15px
+      );
+    }
+
+    .step-title {
+      font-size: 1.0625rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .step-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.72;
+    }
+
+    /* ── For Schools ────────────────────────────────────────────── */
+    .section-schools {
+      background-color: var(--bg-dark);
+      padding: 96px 0;
+    }
+
+    .schools-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+
+    @media (min-width: 860px) {
+      .schools-layout {
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        gap: 64px;
+      }
+    }
+
+    .schools-headline {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.75px;
+      margin-bottom: 18px;
+      line-height: 1.14;
+    }
+
+    .schools-body {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.76;
+      margin-bottom: 28px;
+    }
+
+    .schools-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 34px;
+    }
+
+    .schools-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .schools-features li::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .schools-image {
+      aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, rgba(26, 47, 74, 0.6), rgba(26, 47, 74, 0.3));
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .schools-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 20px,
+        rgba(57, 217, 138, 0.03) 20px,
+        rgba(57, 217, 138, 0.03) 21px
+      );
+    }
+
+    /* ── Teacher Training ───────────────────────────────────────── */
+    .section-training {
+      background-color: var(--bg-surface);
+      padding: 96px 0;
+      position: relative;
+    }
+
+    .training-header {
+      max-width: 600px;
+      margin-bottom: 56px;
+    }
+
+    .training-headline {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.75px;
+      margin-bottom: 16px;
+      line-height: 1.14;
+    }
+
+    .training-intro {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.76;
+    }
+
+    .training-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    @media (min-width: 640px) {
+      .training-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 960px) {
+      .training-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .training-card {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 32px 26px;
+      transition: border-color 0.3s ease, transform 0.3s ease,
+                  box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .training-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 0;
+      background-color: var(--accent);
+      transition: height 0.3s ease;
+    }
+
+    .training-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .training-card:hover::before { height: 100%; }
+
+    .training-card-icon {
+      width: 40px;
+      height: 40px;
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      transition: background-color 0.3s ease;
+    }
+
+    .training-card:hover .training-card-icon {
+      background-color: var(--accent);
+    }
+
+    .training-card:hover .training-card-icon svg {
+      stroke: var(--bg-dark);
+    }
+
+    .training-card-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .training-card-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.72;
+    }
+
+    .training-audiences {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .audience-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text);
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      transition: border-color 0.2s ease;
+    }
+
+    .audience-tag:hover { border-color: var(--accent); }
+
+    .audience-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .training-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .training-cta-note {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Community ──────────────────────────────────────────────── */
+    .section-community {
+      background-color: var(--bg-dark);
+      padding: 96px 0;
+    }
+
+    .community-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 64px;
+    }
+
+    .community-header {
+      max-width: 620px;
+    }
+
+    .community-headline {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.75px;
+      margin-bottom: 16px;
+      line-height: 1.14;
+    }
+
+    .community-intro {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.76;
+    }
+
+    /* initiative tracks */
+    .tracks {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .tracks { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .track-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 32px 26px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease, transform 0.3s ease,
+                  box-shadow 0.3s ease;
+    }
+
+    .track-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .track-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .track-card:hover::after { transform: scaleX(1); }
+
+    .track-icon {
+      width: 44px;
+      height: 44px;
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .track-card:hover .track-icon {
+      background-color: var(--accent);
+    }
+
+    .track-card:hover .track-icon svg { stroke: var(--bg-dark); }
+
+    .track-label {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--bg-dark);
+      background-color: var(--accent-lt);
+      padding: 3px 10px;
+      letter-spacing: 0.02em;
+      margin-bottom: 14px;
+    }
+
+    .track-title {
+      font-size: 1.0625rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .track-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.72;
+    }
+
+    /* volunteer call-to-action banner */
+    .volunteer-banner {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 40px 36px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    @media (min-width: 768px) {
+      .volunteer-banner {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 48px;
+      }
+    }
+
+    .volunteer-headline {
+      font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .volunteer-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.72;
+    }
+
+    .volunteer-roles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .role-chip {
+      font-size: 0.775rem;
+      font-weight: 500;
+      color: var(--accent);
+      background-color: rgba(57, 217, 138, 0.08);
+      border: 1px solid rgba(57, 217, 138, 0.2);
+      padding: 6px 14px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .role-chip:hover {
+      background-color: rgba(57, 217, 138, 0.14);
+      border-color: var(--accent);
+    }
+
+    .volunteer-cta {
+      flex-shrink: 0;
+    }
+
+    /* ── Early access ──────────────────────────────────────────── */
+    .section-access {
+      background-color: var(--accent);
+      padding: 96px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-access::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 400px;
+      height: 400px;
+      border: 1px solid rgba(10, 22, 40, 0.1);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .section-access::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 280px;
+      height: 280px;
+      border: 1px solid rgba(10, 22, 40, 0.08);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .access-inner {
+      max-width: 560px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .access-headline {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 500;
+      color: var(--bg-dark);
+      letter-spacing: -0.75px;
+      margin-bottom: 10px;
+      line-height: 1.14;
+    }
+
+    .access-sub {
+      font-size: 0.9375rem;
+      color: var(--bg-dark);
+      opacity: 0.6;
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .access-form {
+      display: flex;
+      width: 100%;
+    }
+
+    .access-input {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      font-weight: 400;
+      background-color: rgba(10, 22, 40, 0.08);
+      border: 2px solid var(--bg-dark);
+      border-right: none;
+      color: var(--bg-dark);
+      outline: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .access-input::placeholder {
+      color: var(--bg-dark);
+      opacity: 0.4;
+    }
+
+    .access-input:focus {
+      background-color: rgba(10, 22, 40, 0.14);
+    }
+
+    .access-btn {
+      padding: 14px 28px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      font-family: inherit;
+      background-color: var(--bg-dark);
+      color: var(--accent);
+      border: 2px solid var(--bg-dark);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .access-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .access-success {
+      display: none;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--bg-dark);
+      padding: 14px 0;
+    }
+
+    @media (max-width: 479px) {
+      .access-form { flex-direction: column; }
+      .access-input { border-right: 2px solid var(--bg-dark); border-bottom: none; }
+      .access-btn { width: 100%; }
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    .footer {
+      background-color: var(--bg-dark);
+      border-top: 1px solid var(--border);
+      padding: 56px 0 36px;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 32px;
+      margin-bottom: 44px;
+    }
+
+    .footer-tagline {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .footer-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 28px;
+      list-style: none;
+      padding-top: 3px;
+    }
+
+    .footer-nav a {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-nav a:hover { color: var(--text); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 22px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Section divider ────────────────────────────────────────── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--accent) 20%,
+        var(--accent) 80%,
+        transparent 100%
+      );
+      opacity: 0.2;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────────────── -->
+  <header class="navbar" id="top">
+    <div class="navbar-inner">
+      <a href="#top" class="logo" aria-label="NED — home">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="36" height="36" aria-hidden="true">
+          <circle cx="50" cy="50" r="32" fill="none" stroke="#39D98A" stroke-width="2"/>
+          <circle cx="50" cy="50" r="7" fill="#39D98A"/>
+          <line x1="50" y1="18" x2="50" y2="6"  stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+          <line x1="50" y1="82" x2="50" y2="94" stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+          <line x1="18" y1="50" x2="6"  y2="50" stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+          <line x1="82" y1="50" x2="94" y2="50" stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+          <line x1="72.6" y1="27.4" x2="78.3" y2="21.7" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+          <line x1="27.4" y1="27.4" x2="21.7" y2="21.7" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+          <line x1="72.6" y1="72.6" x2="78.3" y2="78.3" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+          <line x1="27.4" y1="72.6" x2="21.7" y2="78.3" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+        </svg>
+        <span class="logo-wordmark">NED</span>
+      </a>
+
+      <nav aria-label="Primary navigation">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#subjects">Subjects</a></li>
+          <li><a href="#schools">For Schools</a></li>
+          <li><a href="#training">Training</a></li>
+          <li><a href="#community">Community</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li class="nav-mobile-cta-item">
+            <a href="#access" class="nav-mobile-cta">Get early access</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="nav-right">
+        <a href="#access" class="btn-nav">Get early access</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ── Hero ───────────────────────────────────────────────────── -->
+  <section class="hero" id="about">
+    <canvas id="particles"></canvas>
+
+    <div class="hero-orb" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="32" fill="none" stroke="#39D98A" stroke-width="0.7"/>
+        <circle cx="50" cy="50" r="7" fill="#39D98A"/>
+        <line x1="50" y1="18" x2="50" y2="4"  stroke="#39D98A" stroke-width="0.9"/>
+        <line x1="50" y1="82" x2="50" y2="96" stroke="#39D98A" stroke-width="0.9"/>
+        <line x1="18" y1="50" x2="4"  y2="50" stroke="#39D98A" stroke-width="0.9"/>
+        <line x1="82" y1="50" x2="96" y2="50" stroke="#39D98A" stroke-width="0.9"/>
+        <line x1="72.6" y1="27.4" x2="78.3" y2="21.7" stroke="#B8F5D8" stroke-width="0.55" opacity="0.55"/>
+        <line x1="27.4" y1="27.4" x2="21.7" y2="21.7" stroke="#B8F5D8" stroke-width="0.55" opacity="0.55"/>
+        <line x1="72.6" y1="72.6" x2="78.3" y2="78.3" stroke="#B8F5D8" stroke-width="0.55" opacity="0.55"/>
+        <line x1="27.4" y1="72.6" x2="21.7" y2="78.3" stroke="#B8F5D8" stroke-width="0.55" opacity="0.55"/>
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#39D98A" stroke-width="0.35" opacity="0.4"/>
+        <circle cx="50" cy="50" r="20" fill="none" stroke="#39D98A" stroke-width="0.25" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <div class="container">
+      <div class="hero-layout">
+        <div class="hero-body">
+          <h1 class="hero-headline" id="hero-headline" aria-label="The Future is STEM"></h1>
+
+          <div class="hero-sub" aria-live="polite">
+            <div class="hero-track" id="hero-track">
+              <p class="hero-slide">Give your kids the STEM advantage — real skills they'll carry for life.</p>
+              <p class="hero-slide">Your child will learn problem solving, teamwork, and communication before life demands it.</p>
+              <p class="hero-slide">Join the kids at NED to build the future, one experiment at a time.</p>
+            </div>
+          </div>
+
+          <div class="hero-progress" aria-label="Slideshow controls">
+            <button class="hero-dot is-active" data-slide="0" aria-label="Slide 1"></button>
+            <button class="hero-dot" data-slide="1" aria-label="Slide 2"></button>
+            <button class="hero-dot" data-slide="2" aria-label="Slide 3"></button>
+          </div>
+
+          <div class="hero-ctas">
+            <a href="#access" class="btn-primary">Start learning</a>
+            <a href="#schools" class="btn-secondary">For schools</a>
+          </div>
+        </div>
+
+        <div class="hero-image" aria-hidden="true">
+          <div class="placeholder-icon">
+            <svg width="24" height="24" fill="none" stroke="#8FA3B8" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="m21 15-5-5L5 21"/>
+            </svg>
+          </div>
+          <span class="placeholder-label">Student photo here</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Stats ──────────────────────────────────────────────────── -->
+  <section class="section-stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat reveal">
+          <div class="stat-value" data-target="6">0</div>
+          <div class="stat-label">STEM subjects</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-value" data-target="3">0</div>
+          <div class="stat-label">Step learning method</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-value" data-target="100" data-suffix="%">0%</div>
+          <div class="stat-label">Hands-on approach</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-value" data-target="1" data-suffix=" mission">0</div>
+          <div class="stat-label">Build Africa's future</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Problem ────────────────────────────────────────────────── -->
+  <section class="section-problem">
+    <div class="container">
+      <span class="section-label reveal">Why NED</span>
+      <div class="problem-grid reveal-stagger">
+
+        <article class="problem-card reveal">
+          <span class="problem-num">01</span>
+          <h3 class="problem-title">Lessons are too theoretical</h3>
+          <p class="problem-body">Science is taught without real-world application, leaving students disconnected from what they're learning and why it matters.</p>
+        </article>
+
+        <article class="problem-card reveal">
+          <span class="problem-num">02</span>
+          <h3 class="problem-title">Students don't see the why</h3>
+          <p class="problem-body">Without career context, it's hard to care about a subject. NED connects every lesson to where it leads in the real world.</p>
+        </article>
+
+        <article class="problem-card reveal">
+          <span class="problem-num">03</span>
+          <h3 class="problem-title">Access is a barrier</h3>
+          <p class="problem-body">Quality STEM education is expensive and unequal. NED is built to close that gap — starting in Nigeria, across Africa.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── Subjects ───────────────────────────────────────────────── -->
+  <section class="section-subjects" id="subjects">
+    <div class="container">
+      <span class="section-label reveal">What we teach</span>
+      <div class="subjects-grid reveal-stagger">
+
+        <article class="subject-card reveal">
+          <svg class="subject-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <circle cx="14" cy="14" r="3" fill="#39D98A"/>
+            <ellipse cx="14" cy="14" rx="12" ry="4.5" stroke="#39D98A" stroke-width="1.2"/>
+            <ellipse cx="14" cy="14" rx="12" ry="4.5" stroke="#39D98A" stroke-width="1.2" transform="rotate(60 14 14)"/>
+            <ellipse cx="14" cy="14" rx="12" ry="4.5" stroke="#39D98A" stroke-width="1.2" transform="rotate(120 14 14)"/>
+          </svg>
+          <p class="subject-name">Physics</p>
+          <p class="subject-desc">Forces, energy, and how the physical world works</p>
+          <span class="subject-tag">Core science</span>
+        </article>
+
+        <article class="subject-card reveal">
+          <svg class="subject-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <path d="M10 4h8v9l4.5 8.5a1 1 0 0 1-.9 1.5H6.4a1 1 0 0 1-.9-1.5L10 13V4Z" stroke="#39D98A" stroke-width="1.2" stroke-linejoin="round"/>
+            <line x1="10" y1="9" x2="18" y2="9" stroke="#39D98A" stroke-width="1"/>
+            <circle cx="11.5" cy="19" r="1.25" fill="#39D98A"/>
+            <circle cx="16.5" cy="21" r="1" fill="#39D98A"/>
+          </svg>
+          <p class="subject-name">Chemistry</p>
+          <p class="subject-desc">Matter, reactions, and the science of materials</p>
+          <span class="subject-tag">Core science</span>
+        </article>
+
+        <article class="subject-card reveal">
+          <svg class="subject-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <circle cx="14" cy="14" r="10" stroke="#39D98A" stroke-width="1.2"/>
+            <ellipse cx="14" cy="14" rx="4.5" ry="10" stroke="#39D98A" stroke-width="1.2"/>
+            <line x1="4" y1="14" x2="24" y2="14" stroke="#39D98A" stroke-width="1"/>
+          </svg>
+          <p class="subject-name">Biology</p>
+          <p class="subject-desc">Life systems, cells, and living organisms</p>
+          <span class="subject-tag">Core science</span>
+        </article>
+
+        <article class="subject-card reveal">
+          <svg class="subject-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <rect x="10" y="10" width="8" height="8" stroke="#39D98A" stroke-width="1.2"/>
+            <line x1="14" y1="3"  x2="14" y2="10" stroke="#39D98A" stroke-width="1.2"/>
+            <line x1="14" y1="18" x2="14" y2="25" stroke="#39D98A" stroke-width="1.2"/>
+            <line x1="3"  y1="14" x2="10" y2="14" stroke="#39D98A" stroke-width="1.2"/>
+            <line x1="18" y1="14" x2="25" y2="14" stroke="#39D98A" stroke-width="1.2"/>
+            <circle cx="14" cy="3"  r="1.5" fill="#39D98A"/>
+            <circle cx="14" cy="25" r="1.5" fill="#39D98A"/>
+            <circle cx="3"  cy="14" r="1.5" fill="#39D98A"/>
+            <circle cx="25" cy="14" r="1.5" fill="#39D98A"/>
+          </svg>
+          <p class="subject-name">Electronics</p>
+          <p class="subject-desc">Circuits, components, and building real devices</p>
+          <span class="subject-tag">Applied</span>
+        </article>
+
+        <article class="subject-card reveal">
+          <svg class="subject-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <polyline points="10,7 3,14 10,21"  stroke="#39D98A" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"/>
+            <polyline points="18,7 25,14 18,21" stroke="#39D98A" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"/>
+            <line x1="16.5" y1="5" x2="11.5" y2="23" stroke="#39D98A" stroke-width="1.2"/>
+          </svg>
+          <p class="subject-name">Coding</p>
+          <p class="subject-desc">Programming, logic, and software fundamentals</p>
+          <span class="subject-tag">Applied</span>
+        </article>
+
+        <article class="subject-card reveal">
+          <svg class="subject-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <rect x="4" y="4" width="20" height="20" stroke="#39D98A" stroke-width="1.2"/>
+            <line x1="4"  y1="4"  x2="24" y2="24" stroke="#39D98A" stroke-width="0.9" opacity="0.6"/>
+            <line x1="24" y1="4"  x2="4"  y2="24" stroke="#39D98A" stroke-width="0.9" opacity="0.6"/>
+            <circle cx="14" cy="14" r="3.5" fill="none" stroke="#39D98A" stroke-width="1.2"/>
+          </svg>
+          <p class="subject-name">Mathematics</p>
+          <p class="subject-desc">Numbers, patterns, and problem-solving frameworks</p>
+          <span class="subject-tag">Foundation</span>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Skills ──────────────────────────────────────────────────── -->
+  <section class="section-skills">
+    <div class="container">
+      <span class="section-label reveal">What you will learn</span>
+      <div class="skills-grid reveal-stagger">
+
+        <article class="skill-card reveal">
+          <div class="skill-icon">
+            <svg width="32" height="32" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"/>
+            </svg>
+          </div>
+          <h3 class="skill-name">Leadership</h3>
+          <p class="skill-body">Take initiative, make decisions under uncertainty, and guide a team toward a shared goal — not because you're told to, but because you can.</p>
+        </article>
+
+        <article class="skill-card reveal">
+          <div class="skill-icon">
+            <svg width="32" height="32" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+            </svg>
+          </div>
+          <h3 class="skill-name">Ownership</h3>
+          <p class="skill-body">Your project, your responsibility. NED teaches students to own their work end-to-end — the wins and the failures.</p>
+        </article>
+
+        <article class="skill-card reveal">
+          <div class="skill-icon">
+            <svg width="32" height="32" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.491 48.491 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/>
+            </svg>
+          </div>
+          <h3 class="skill-name">Problem solving</h3>
+          <p class="skill-body">Break complex problems into parts, test ideas quickly, and iterate. The same method that builds bridges also builds apps.</p>
+        </article>
+
+        <article class="skill-card reveal">
+          <div class="skill-icon">
+            <svg width="32" height="32" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/>
+            </svg>
+          </div>
+          <h3 class="skill-name">Communication</h3>
+          <p class="skill-body">Explain your thinking clearly — to a teammate, a teacher, or a room full of people. Ideas only matter if you can share them.</p>
+        </article>
+
+        <article class="skill-card reveal">
+          <div class="skill-icon">
+            <svg width="32" height="32" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.228A2.25 2.25 0 0 1 3 16.878v-.003c0-2.622 1.94-4.811 4.533-5.142a9.77 9.77 0 0 1 2.467-.127m5.786 4.422a6.02 6.02 0 0 0-3.572-4.384M13.5 8.625a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
+            </svg>
+          </div>
+          <h3 class="skill-name">Teamwork</h3>
+          <p class="skill-body">Build with other people. Disagree productively. Divide work fairly. The best projects are never solo — and neither are the best careers.</p>
+        </article>
+
+        <article class="skill-card reveal">
+          <div class="skill-icon">
+            <svg width="32" height="32" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/>
+              <path d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/>
+            </svg>
+          </div>
+          <h3 class="skill-name">Doing hard things</h3>
+          <p class="skill-body">Experiments fail. Code breaks. That's the point. NED students learn to push through frustration and come out sharper on the other side.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ───────────────────────────────────────────── -->
+  <section class="section-how">
+    <div class="container">
+      <span class="section-label reveal">How NED works</span>
+      <div class="steps reveal-stagger">
+
+        <article class="step-card reveal">
+          <div class="step-num">01</div>
+          <div class="step-img">
+            <span class="placeholder-label">Lesson preview</span>
+          </div>
+          <h3 class="step-title">Learn the concept</h3>
+          <p class="step-body">Visual, contextual lessons built around mental models — not memorisation. Every topic starts with the real world.</p>
+        </article>
+
+        <article class="step-card reveal">
+          <div class="step-num">02</div>
+          <div class="step-img">
+            <span class="placeholder-label">Hands-on project</span>
+          </div>
+          <h3 class="step-title">Apply it hands-on</h3>
+          <p class="step-body">Projects, circuits, experiments — every concept connects to something you can build, test, or take apart.</p>
+        </article>
+
+        <article class="step-card reveal">
+          <div class="step-num">03</div>
+          <div class="step-img">
+            <span class="placeholder-label">Career pathways</span>
+          </div>
+          <h3 class="step-title">See where it leads</h3>
+          <p class="step-body">Career pathways and real-world context for every subject, so students always know the why behind the what.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── For Schools ────────────────────────────────────────────── -->
+  <section class="section-schools" id="schools">
+    <div class="container">
+      <div class="schools-layout">
+
+        <div class="reveal">
+          <span class="section-label">For schools</span>
+          <h2 class="schools-headline">Bring NED to your school</h2>
+          <p class="schools-body">
+            We partner with schools across Nigeria to deliver STEM programmes
+            that extend existing curricula. Holiday intensives, after-school
+            sessions, or long-term curriculum support — NED fits your schedule
+            and your students.
+          </p>
+          <ul class="schools-features">
+            <li>Holiday STEM intensives</li>
+            <li>After-school sessions</li>
+            <li>Curriculum support and planning</li>
+            <li>Teacher training</li>
+            <li>Student progress tracking and reporting</li>
+            <li>Flexible, affordable partnership models</li>
+          </ul>
+          <a href="#contact" class="btn-primary">Partner with us</a>
+        </div>
+
+        <div class="schools-image reveal" aria-hidden="true">
+          <div class="placeholder-icon">
+            <svg width="24" height="24" fill="none" stroke="#8FA3B8" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="m21 15-5-5L5 21"/>
+            </svg>
+          </div>
+          <span class="placeholder-label">Classroom photo here</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Teacher Training ─────────────────────────────────────────── -->
+  <section class="section-training" id="training">
+    <div class="container">
+
+      <div class="training-header reveal">
+        <span class="section-label">Teacher training</span>
+        <h2 class="training-headline">Great STEM education starts with great teachers</h2>
+        <p class="training-intro">
+          Africa doesn't just have a student access problem — it has a teacher readiness problem.
+          Most science teachers were never trained to teach STEM the way the world now demands it:
+          hands-on, project-based, and connected to real careers. NED bridges that gap.
+        </p>
+      </div>
+
+      <div class="training-grid reveal-stagger">
+
+        <article class="training-card reveal">
+          <div class="training-card-icon">
+            <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+            </svg>
+          </div>
+          <h3 class="training-card-title">Curriculum redesign</h3>
+          <p class="training-card-body">We work with educators to restructure STEM curricula around practical application, local context, and career relevance — not just exam prep.</p>
+        </article>
+
+        <article class="training-card reveal">
+          <div class="training-card-icon">
+            <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/>
+            </svg>
+          </div>
+          <h3 class="training-card-title">Hands-on methodology</h3>
+          <p class="training-card-body">Intensive workshops that equip teachers to lead experiments, build circuits, and run coding sessions — even with limited lab resources.</p>
+        </article>
+
+        <article class="training-card reveal">
+          <div class="training-card-icon">
+            <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128H5.228A2.25 2.25 0 0 1 3 16.878v-.003c0-2.622 1.94-4.811 4.533-5.142a9.77 9.77 0 0 1 2.467-.127m5.786 4.422a6.02 6.02 0 0 0-3.572-4.384M13.5 8.625a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
+            </svg>
+          </div>
+          <h3 class="training-card-title">Train-the-trainer</h3>
+          <p class="training-card-body">We don't just train once and leave. Our cascading model turns your best teachers into STEM training leads who upskill their peers long-term.</p>
+        </article>
+
+        <article class="training-card reveal">
+          <div class="training-card-icon">
+            <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/>
+            </svg>
+          </div>
+          <h3 class="training-card-title">Impact measurement</h3>
+          <p class="training-card-body">Pre- and post-training assessments, classroom observation, and reporting dashboards so funders and agencies can see measurable outcomes.</p>
+        </article>
+
+        <article class="training-card reveal">
+          <div class="training-card-icon">
+            <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-2.247m0 0A8.966 8.966 0 0 1 3 12c0-1.264.26-2.467.732-3.559"/>
+            </svg>
+          </div>
+          <h3 class="training-card-title">Regional deployment</h3>
+          <p class="training-card-body">Programmes designed for state-wide or regional rollout. We've built NED to scale across diverse school systems and resource levels.</p>
+        </article>
+
+        <article class="training-card reveal">
+          <div class="training-card-icon">
+            <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a23.838 23.838 0 0 0-1.012 5.434 23.847 23.847 0 0 0 2.504-.758 23.84 23.84 0 0 0 1.012-5.434m0 0A23.72 23.72 0 0 1 12 3c2.59 0 5.088.415 7.432 1.18m-14.864 5.967L12 13.5l7.432-3.353"/>
+            </svg>
+          </div>
+          <h3 class="training-card-title">Certification</h3>
+          <p class="training-card-body">Teachers who complete the programme earn a NED STEM Educator certification — a verifiable credential that signals readiness to teach modern STEM.</p>
+        </article>
+
+      </div>
+
+      <div class="reveal">
+        <p class="training-cta-note" style="margin-bottom: 20px;">Built for organisations shaping education policy and access:</p>
+        <div class="training-audiences">
+          <span class="audience-tag">State ministries of education</span>
+          <span class="audience-tag">Federal agencies</span>
+          <span class="audience-tag">NGOs and foundations</span>
+          <span class="audience-tag">International development orgs</span>
+          <span class="audience-tag">Private school networks</span>
+        </div>
+        <div class="training-cta-row">
+          <a href="#contact" class="btn-primary">Discuss a programme</a>
+          <span class="training-cta-note">Custom scoping for every partnership</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Community ───────────────────────────────────────────────── -->
+  <section class="section-community" id="community">
+    <div class="container">
+
+      <div class="community-layout">
+        <div class="community-header reveal">
+          <span class="section-label">Community initiative</span>
+          <h2 class="community-headline">Solve real problems. Build what matters.</h2>
+          <p class="community-intro">
+            NED Community is for university students and recent graduates who want to
+            apply technology — hardware or software — to local challenges. This isn't
+            coursework. It's real projects, real communities, real impact.
+          </p>
+        </div>
+
+        <div class="tracks reveal-stagger">
+
+          <article class="track-card reveal">
+            <div class="track-icon">
+              <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.049.58.025 1.193-.14 1.743"/>
+              </svg>
+            </div>
+            <span class="track-label">Hardware</span>
+            <h3 class="track-title">Build devices that solve local problems</h3>
+            <p class="track-body">Solar-powered irrigation controllers, air quality monitors, low-cost medical devices — prototype solutions for challenges in your community.</p>
+          </article>
+
+          <article class="track-card reveal">
+            <div class="track-icon">
+              <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"/>
+              </svg>
+            </div>
+            <span class="track-label">Software</span>
+            <h3 class="track-title">Write code that changes how things work</h3>
+            <p class="track-body">Apps for local market traders, school management tools, health data platforms — build software that makes a tangible difference where you live.</p>
+          </article>
+
+          <article class="track-card reveal">
+            <div class="track-icon">
+              <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>
+              </svg>
+            </div>
+            <span class="track-label">Research</span>
+            <h3 class="track-title">Investigate and document what's needed</h3>
+            <p class="track-body">Community research, needs assessment, and feasibility studies that ground every project in evidence and local context.</p>
+          </article>
+
+          <article class="track-card reveal">
+            <div class="track-icon">
+              <svg width="20" height="20" fill="none" stroke="#39D98A" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
+              </svg>
+            </div>
+            <span class="track-label">Mentorship</span>
+            <h3 class="track-title">Learn from people who've built before</h3>
+            <p class="track-body">Pair with engineers, designers, and entrepreneurs who guide your project from idea to working prototype.</p>
+          </article>
+
+        </div>
+
+        <!-- Volunteer call -->
+        <div class="volunteer-banner reveal">
+          <div>
+            <h3 class="volunteer-headline">Join us. We're building this together.</h3>
+            <p class="volunteer-body">
+              NED Community runs on people who care. Whether you can give a weekend or
+              a whole semester, there's a role for you.
+            </p>
+            <div class="volunteer-roles">
+              <span class="role-chip">Volunteer educators</span>
+              <span class="role-chip">Event organisers</span>
+              <span class="role-chip">Technical mentors</span>
+              <span class="role-chip">Community leads</span>
+              <span class="role-chip">Content creators</span>
+              <span class="role-chip">Campus ambassadors</span>
+            </div>
+          </div>
+          <div class="volunteer-cta">
+            <a href="#access" class="btn-primary">Get involved</a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── Early access ───────────────────────────────────────────── -->
+  <section class="section-access" id="access">
+    <div class="container">
+      <div class="access-inner reveal">
+        <h2 class="access-headline">Be first to build the future</h2>
+        <p class="access-sub">We're launching soon. Leave your email and we'll let you know the moment NED goes live.</p>
+        <form class="access-form" id="access-form" novalidate>
+          <input
+            class="access-input"
+            type="email"
+            id="access-email"
+            name="email"
+            placeholder="your@email.com"
+            autocomplete="email"
+            required
+          />
+          <button type="submit" class="access-btn">Get access</button>
+        </form>
+        <p class="access-success" id="access-success" role="status" aria-live="polite">
+          You're on the list. We'll be in touch.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Footer ─────────────────────────────────────────────────── -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <a href="#top" class="logo" aria-label="NED — home">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="30" height="30" aria-hidden="true">
+              <circle cx="50" cy="50" r="32" fill="none" stroke="#39D98A" stroke-width="2"/>
+              <circle cx="50" cy="50" r="7" fill="#39D98A"/>
+              <line x1="50" y1="18" x2="50" y2="6"  stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+              <line x1="50" y1="82" x2="50" y2="94" stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+              <line x1="18" y1="50" x2="6"  y2="50" stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+              <line x1="82" y1="50" x2="94" y2="50" stroke="#39D98A" stroke-width="2.5" stroke-linecap="square"/>
+              <line x1="72.6" y1="27.4" x2="78.3" y2="21.7" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+              <line x1="27.4" y1="27.4" x2="21.7" y2="21.7" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+              <line x1="72.6" y1="72.6" x2="78.3" y2="78.3" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+              <line x1="27.4" y1="72.6" x2="21.7" y2="78.3" stroke="#B8F5D8" stroke-width="1.5" opacity="0.55" stroke-linecap="square"/>
+            </svg>
+            <span class="logo-wordmark">NED</span>
+          </a>
+          <p class="footer-tagline">build the future</p>
+        </div>
+        <nav aria-label="Footer navigation">
+          <ul class="footer-nav">
+            <li><a href="#about">About</a></li>
+            <li><a href="#subjects">Subjects</a></li>
+            <li><a href="#schools">Schools</a></li>
+            <li><a href="#training">Training</a></li>
+            <li><a href="#community">Community</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 NED. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+
+  <script>
+    // ── Particle canvas ──────────────────────────────────────────
+    (function () {
+      const canvas = document.getElementById('particles');
+      const ctx    = canvas.getContext('2d');
+      let w, h, particles;
+      const PARTICLE_COUNT = 50;
+      const CONNECT_DIST   = 140;
+      const SPEED           = 0.3;
+
+      function resize() {
+        w = canvas.width  = canvas.offsetWidth;
+        h = canvas.height = canvas.offsetHeight;
+      }
+
+      function init() {
+        resize();
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push({
+            x:  Math.random() * w,
+            y:  Math.random() * h,
+            vx: (Math.random() - 0.5) * SPEED,
+            vy: (Math.random() - 0.5) * SPEED,
+            r:  Math.random() * 1.5 + 0.5
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(57, 217, 138, 0.35)';
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const q  = particles[j];
+            const dx = p.x - q.x;
+            const dy = p.y - q.y;
+            const d  = Math.sqrt(dx * dx + dy * dy);
+            if (d < CONNECT_DIST) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = `rgba(57, 217, 138, ${0.12 * (1 - d / CONNECT_DIST)})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      init();
+      draw();
+      window.addEventListener('resize', resize);
+    })();
+
+
+    // ── Typing effect ────────────────────────────────────────────
+    (function () {
+      const el   = document.getElementById('hero-headline');
+      const text = 'The Future is STEM';
+      let i = 0;
+
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      el.appendChild(cursor);
+
+      function type() {
+        if (i < text.length) {
+          el.insertBefore(document.createTextNode(text[i]), cursor);
+          i++;
+          setTimeout(type, 70 + Math.random() * 40);
+        } else {
+          setTimeout(() => cursor.remove(), 2000);
+        }
+      }
+
+      setTimeout(type, 400);
+    })();
+
+
+    // ── Slideshow ────────────────────────────────────────────────
+    (function () {
+      const track = document.getElementById('hero-track');
+      const dots  = document.querySelectorAll('.hero-dot');
+      const count = dots.length;
+      let cur     = 0;
+      let timer;
+
+      function go(n) {
+        dots[cur].classList.remove('is-active');
+        cur = n;
+        dots[cur].classList.add('is-active');
+        track.style.transform = `translateX(-${cur * 100}%)`;
+      }
+
+      function next() { go((cur + 1) % count); }
+
+      function start() { timer = setInterval(next, 4000); }
+
+      dots.forEach(d => d.addEventListener('click', () => {
+        clearInterval(timer);
+        go(Number(d.dataset.slide));
+        start();
+      }));
+
+      start();
+    })();
+
+
+    // ── Scroll reveal ────────────────────────────────────────────
+    (function () {
+      const els = document.querySelectorAll('.reveal');
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('revealed');
+            obs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      els.forEach(el => obs.observe(el));
+    })();
+
+
+    // ── Stats counter ────────────────────────────────────────────
+    (function () {
+      const stats = document.querySelectorAll('.stat-value');
+      let fired = false;
+
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting && !fired) {
+            fired = true;
+            stats.forEach(el => {
+              const target = Number(el.dataset.target);
+              const suffix = el.dataset.suffix || '';
+              const dur    = 1400;
+              const start  = performance.now();
+
+              function tick(now) {
+                const t = Math.min((now - start) / dur, 1);
+                const ease = 1 - Math.pow(1 - t, 3);
+                el.textContent = Math.round(target * ease) + suffix;
+                if (t < 1) requestAnimationFrame(tick);
+              }
+
+              requestAnimationFrame(tick);
+            });
+            obs.disconnect();
+          }
+        });
+      }, { threshold: 0.3 });
+
+      stats.forEach(el => obs.observe(el));
+    })();
+
+
+    // ── Navbar scroll state ──────────────────────────────────────
+    (function () {
+      const nav = document.querySelector('.navbar');
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+      }, { passive: true });
+    })();
+
+
+    // ── Mobile nav toggle ────────────────────────────────────────
+    (function () {
+      const toggle   = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+
+      toggle.addEventListener('click', () => {
+        const open = navLinks.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', open);
+      });
+
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+    })();
+
+
+    // ── Email form ───────────────────────────────────────────────
+    (function () {
+      const form    = document.getElementById('access-form');
+      const success = document.getElementById('access-success');
+      const emailEl = document.getElementById('access-email');
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const v = emailEl.value.trim();
+        if (!v || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+          emailEl.focus();
+          emailEl.style.outline = '2px solid var(--bg-dark)';
+          setTimeout(() => { emailEl.style.outline = ''; }, 1200);
+          return;
+        }
+        form.style.display    = 'none';
+        success.style.display = 'block';
+      });
+    })();
+  </script>
+
+</body>
+</html>
